@@ -170,13 +170,13 @@ eval :: Env -> Expr -> Value
 --eval ev (Value q) = q
 eval ev (EInt q) = value q
 eval ev (EVar q) = lookupId q ev
---eval ev (EBin Plus w e)= (eval ev w) + (eval ev e)
+eval ev (EBin Plus w e)= evalOp Plus (eval ev w) (eval ev e)
 --eval ev (EBin Minus w e)= (eval ev w) - (eval ev e)
 --eval ev (EBin Mul w e)= (eval ev w) * (eval ev e)
 --------------------------------------------------------------------------------
 evalOp :: Binop -> Value -> Value -> Value
 --------------------------------------------------------------------------------
-evalOp = error "TBD:evalOp"
+evalOp Plus (VInt x) (VInt y) = VInt(x+y)
 
 --------------------------------------------------------------------------------
 -- | `lookupId x env` returns the most recent
