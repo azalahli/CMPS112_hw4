@@ -171,6 +171,17 @@ eval :: Env -> Expr -> Value
 eval ev (EInt q) = value q
 eval ev (EVar q) = lookupId q ev
 eval ev (EBin q w e)= evalOp q (eval ev w) (eval ev e)
+eval ev (EIf p t f) = if (eval ev p) == (VBool True)
+    then eval ev t
+    else eval ev f
+eval ev (ELet x e1 e2) = eval env' e2
+    where
+        env' =  (x,(eval ev e1)):ev
+        --v = eval ev e1
+        --env' =  (x,v):ev
+        --env' =  ev ++ [(x,v)]
+        
+        
 eval _ _ = throw (Error "type error")
 --eval ev (EBin Minus w e)= (eval ev w) (eval ev e)
 --eval ev (EBin Mul w e)= (eval ev w) (eval ev e)
@@ -180,13 +191,18 @@ evalOp :: Binop -> Value -> Value -> Value
 evalOp Plus (VInt x) (VInt y) = VInt(x+y)
 evalOp Minus (VInt x) (VInt y) = VInt(x-y)
 evalOp Mul (VInt x) (VInt y) = VInt(x*y)
+
 evalOp Eq (VInt x) (VInt y) = VBool(x == y)
 evalOp Eq (VBool x) (VBool y) = VBool(x == y)
+
+evalOp Ne (VInt x) (VInt y) = VBool(x /= y)
+evalOp Ne (VBool x) (VBool y) = VBool(x /= y)
+
 evalOp Lt (VInt x) (VInt y) = VBool(x < y)
 evalOp Le (VInt x) (VInt y) = VBool(x <= y)
+
 evalOp And (VBool x) (VBool y) = VBool(x && y)
 evalOp Or (VBool x) (VBool y) = VBool(x || y)
-
 {-
 evalOp Eq (VBool x) (VInt y) = throw (Error "type error")
 evalOp Eq (VInt y) (VBool x) = throw (Error "type error")
