@@ -170,14 +170,43 @@ eval :: Env -> Expr -> Value
 --eval ev (Value q) = q
 eval ev (EInt q) = value q
 eval ev (EVar q) = lookupId q ev
-eval ev (EBin Plus w e)= evalOp Plus (eval ev w) (eval ev e)
---eval ev (EBin Minus w e)= (eval ev w) - (eval ev e)
---eval ev (EBin Mul w e)= (eval ev w) * (eval ev e)
+eval ev (EBin q w e)= evalOp q (eval ev w) (eval ev e)
+eval _ _ = throw (Error "type error")
+--eval ev (EBin Minus w e)= (eval ev w) (eval ev e)
+--eval ev (EBin Mul w e)= (eval ev w) (eval ev e)
 --------------------------------------------------------------------------------
 evalOp :: Binop -> Value -> Value -> Value
 --------------------------------------------------------------------------------
 evalOp Plus (VInt x) (VInt y) = VInt(x+y)
+evalOp Minus (VInt x) (VInt y) = VInt(x-y)
+evalOp Mul (VInt x) (VInt y) = VInt(x*y)
+evalOp Eq (VInt x) (VInt y) = VBool(x == y)
+evalOp Eq (VBool x) (VBool y) = VBool(x == y)
+evalOp Lt (VInt x) (VInt y) = VBool(x < y)
+evalOp Le (VInt x) (VInt y) = VBool(x <= y)
+evalOp And (VBool x) (VBool y) = VBool(x && y)
+evalOp Or (VBool x) (VBool y) = VBool(x || y)
 
+{-
+evalOp Eq (VBool x) (VInt y) = throw (Error "type error")
+evalOp Eq (VInt y) (VBool x) = throw (Error "type error")
+
+evalOp Lt (VBool x) (VBool y) = throw (Error "type error")
+evalOp Lt (VInt x) (VBool y) = throw (Error "type error")
+evalOp Lt (VBool x) (VInt y) = throw (Error "type error")
+
+evalOp Le (VBool x) (VBool y) = throw (Error "type error")
+evalOp Le (VInt x) (VBool y) = throw (Error "type error")
+evalOp Le (VBool x) (VInt y) = throw (Error "type error")
+
+evalOp And (VInt x) (VInt y) = throw (Error "type error")
+evalOp And (VBool x) (VInt y) = throw (Error "type error")
+evalOp And (VInt x) (VBool y) = throw (Error "type error")
+
+evalOp Or (VInt x) (VInt y) = throw (Error "type error")
+evalOp Or (VBool x) (VInt y) = throw (Error "type error")
+evalOp Or (VInt x) (VBool y) = throw (Error "type error")
+-}
 --------------------------------------------------------------------------------
 -- | `lookupId x env` returns the most recent
 --   binding for the variable `x` (i.e. the first
