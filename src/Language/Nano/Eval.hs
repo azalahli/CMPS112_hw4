@@ -240,7 +240,7 @@ evalOp Or (VInt x) (VBool y) = throw (Error "type error")
 --------------------------------------------------------------------------------
 lookupId :: Id -> Env -> Value
 --------------------------------------------------------------------------------
-lookupId x (y:ys) = if ys == []
+lookupId x (y:ys) = if (y:ys) == []
     then throw (Error ("unbound variable: " ++ x))
     else if x == fst(y)
         then snd(y)
