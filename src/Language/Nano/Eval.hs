@@ -176,12 +176,23 @@ eval ev (EIf p t f) = if (eval ev p) == (VBool True)
     else eval ev f
 eval ev (ELet x e1 e2) = eval env' e2
     where
-        env' =  (x,(eval ev e1)):ev
+        env' =  (x,(eval env' e1)):ev
         --v = eval ev e1
         --env' =  (x,v):ev
         --env' =  ev ++ [(x,v)]
-        
-        
+--duplicated by accident
+--eval ev (ELet x e1 e2) = eval env1 e2
+--    where
+--        v = eval ev e1
+--        env1 = (x,v):ev
+eval ev (ELam x y) = VClos ev x y
+eval ev (EApp f a) = eval bev b
+    where
+        (VClos cev c b) = eval ev f
+        arg = eval ev a
+        bev = (c,arg):cev
+
+
 eval _ _ = throw (Error "type error")
 --eval ev (EBin Minus w e)= (eval ev w) (eval ev e)
 --eval ev (EBin Mul w e)= (eval ev w) (eval ev e)
@@ -203,7 +214,7 @@ evalOp Le (VInt x) (VInt y) = VBool(x <= y)
 
 evalOp And (VBool x) (VBool y) = VBool(x && y)
 evalOp Or (VBool x) (VBool y) = VBool(x || y)
-{-
+--{-
 evalOp Eq (VBool x) (VInt y) = throw (Error "type error")
 evalOp Eq (VInt y) (VBool x) = throw (Error "type error")
 
@@ -222,7 +233,9 @@ evalOp And (VInt x) (VBool y) = throw (Error "type error")
 evalOp Or (VInt x) (VInt y) = throw (Error "type error")
 evalOp Or (VBool x) (VInt y) = throw (Error "type error")
 evalOp Or (VInt x) (VBool y) = throw (Error "type error")
--}
+-- i don't know why this did not work earlier
+evalOp _ _ _ = throw (Error "type error")
+--}
 --------------------------------------------------------------------------------
 -- | `lookupId x env` returns the most recent
 --   binding for the variable `x` (i.e. the first
@@ -240,7 +253,8 @@ evalOp Or (VInt x) (VBool y) = throw (Error "type error")
 --------------------------------------------------------------------------------
 lookupId :: Id -> Env -> Value
 --------------------------------------------------------------------------------
-lookupId x (y:ys) = if (y:ys) == []
+lookupId _ [] = throw (Error ("unbound variable"))
+lookupId x (y:ys) = if (y:ys) == [] || x == []
     then throw (Error ("unbound variable: " ++ x))
     else if x == fst(y)
         then snd(y)
