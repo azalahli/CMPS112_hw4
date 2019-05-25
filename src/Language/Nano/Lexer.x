@@ -60,6 +60,11 @@ tokens :-
   "("                           { \p s -> LPAREN    p }
   ")"                           { \p s -> RPAREN    p }
 
+  "["                           { \p s -> LBRAC    p }
+  "]"                           { \p s -> RBRAC    p }
+  ","                           { \p s -> COMMA    p }
+  ":"                           { \p s -> COLON    p }
+
   $alpha [$alpha $digit]*       { \p s -> ID     p s }
   $digit+                       { \p s -> NUM    p (read s) }
   -- DO NOT CHANGE ANYTHING AFTER THIS LINE ------------------------------------

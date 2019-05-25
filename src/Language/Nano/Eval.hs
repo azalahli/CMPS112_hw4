@@ -209,7 +209,9 @@ evalOp Mul (VInt x) (VInt y) = VInt(x*y)
 
 evalOp Eq (VInt x) (VInt y) = VBool(x == y)
 evalOp Eq (VBool x) (VBool y) = VBool(x == y)
-evalOp Eq (VPair x y) VNil = VBool(x == VNil)
+evalOp Eq VNil VNil = VBool(True)
+evalOp Eq (VPair x y) (VPair x1 y1) = VBool((x == x1) && (y == y1))
+evalOp Eq (VPair x y) VNil = VBool(y == VNil)
 
 evalOp Ne (VInt x) (VInt y) = VBool(x /= y)
 evalOp Ne (VBool x) (VBool y) = VBool(x /= y)
