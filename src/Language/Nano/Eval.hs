@@ -188,7 +188,7 @@ eval ev (ELet x e1 e2) = eval env' e2
 --        env1 = (x,v):ev
 eval ev (ELam x y) = VClos ev x y
 eval ev (EApp f a) = case(eval ev f) of 
-    (VPrim p) -> p (eval bev a)
+    (VPrim p) -> p (eval ev a)
     (VClos q1 q2 q3) -> eval bev b
     _ -> throw (Error "type error EApp")
     where
@@ -211,8 +211,8 @@ evalOp Eq (VInt x) (VInt y) = VBool(x == y)
 evalOp Eq (VBool x) (VBool y) = VBool(x == y)
 evalOp Eq VNil VNil = VBool(True)
 evalOp Eq (VPair x y) (VPair x1 y1) = VBool((x == x1) && (y == y1))
-evalOp Eq (VPair x y) VNil = VBool(y == VNil)
-evalOp Eq VNil (VPair x y) = VBool(y == VNil)
+evalOp Eq (VPair x y) VNil = VBool(x == VNil)
+evalOp Eq VNil (VPair x y) = VBool(x == VNil)
 
 evalOp Ne (VInt x) (VInt y) = VBool(x /= y)
 evalOp Ne (VBool x) (VBool y) = VBool(x /= y)
