@@ -65,6 +65,8 @@ import Control.Exception
 %left '*'
 %%
 -}
+%right LOWR
+%left LOWL
 %nonassoc if then else
 %right in '->'
 %left '||'
@@ -74,7 +76,7 @@ import Control.Exception
 %right ']'
 %left '+' '-'
 %left '*'
-%left FPR
+%left APP
 %left FSTL
 %right TESTR
 
@@ -97,34 +99,47 @@ Expr :
     | '\\'ID '->'  Expr                 { ELam $2 $4}
     | let ID '=' Expr in Expr           { ELet $2 $4 $6 }
     | let ID ids '=' Expr in Expr       { ELet $2 (mkLam $3 $5) $7 }
-    --| Expr Expr %prec FPR               { EApp $1 $2 }
-    --| Expr remainder %prec FPR          { EApp $1 $2 }
-    | fbody               {$1}
-    --| remainder Expr %prec FPR          { EApp $1 $2}
-    --| Expr Expr %prec FPR               { EApp $1 $2 }
+
+    | func Expr %prec APP               { EApp $1 $2 }
+    | Expr Expr %prec APP               { EApp $1 $2}
     | TNUM                              { EInt $1 }
     | ID                                { EVar $1 }
     | true                              { EBool True}
     | false                             { EBool False}
     | '(' Expr ')'                      { $2 }
-    | '[' list                          { $2 }
+    | '[' lst ']'                           { $2 }
+    --| Expr ']' %prec LOWL              { EBin Cons $1 ENil}
     | '[' ']'                           { ENil }
 
+func: func Expr {EApp $1 $2}
+| Expr Expr {EApp $1 $2}
 
-    --| Expr Expr %prec FPR          { EApp $1 $2}
+lst: Expr ',' lst    { EBin Cons $1 $3}
+    | Expr            {EBin Cons $1 ENil}
+
+    --| Expr Expr %prec APP          { EApp $1 $2}
     --|  Expr ',' Expr               { EBin Cons $1 $3}
     --| ']'                          { ENil }
     --| '[' Expr ']'                 { $2 }
-
+    --| Expr Expr %prec FPR               { EApp $1 $2 }
+    --| Expr remainder %prec FPR          { EApp $1 $2 }
+    --| fbody                             {$1}
+    --| remainder Expr %prec FPR          { EApp $1 $2}
+    --| Expr Expr %prec FPR               { EApp $1 $2 }
 --remainder : 
 --        Expr                            {$1}
 --      | remainder Expr %prec FPR        {EApp $1 $2}
-      
-fbody: Expr Expr {EApp $1 $2}
-| fbody Expr %prec FPR {EApp $2 $1}
+--fbody: Expr Expr {EApp $1 $2}
+--| fbody Expr %prec FPR {EApp $1 $2}
+--fbody:  fbody Expr {EApp $2 $1}
+--|Expr Expr{EApp $1 $2}
 
-list : list ',' list { EBin Cons $1 $3} 
-    |  list ']'      { EBin Cons $1 ENil}
+
+
+--list : list ',' list { EBin Cons $1 $3} 
+--    |  list ']'      { EBin Cons $1 ENil}
+--list1 : list1 ',' list1 { $1:$3}
+
 ids : ID                            {[$1]}
     | ID ids                        { $1:$2 }
 
