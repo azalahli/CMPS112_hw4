@@ -66,7 +66,7 @@ import Control.Exception
 %%
 -}
 %nonassoc if then else
-%right in
+%right in '->'
 %left '||'
 %left '&&'
 %left '==' '/=' '<' '<='
@@ -96,6 +96,7 @@ Expr :
     | let ID '=' Expr in Expr           { ELet $2 $4 $6 }
     | let ID ids '=' Expr in Expr       { ELet $2 (mkLam $3 $5) $7 }
     | Expr Expr %prec FPR               { EApp $1 $2 }
+    | Expr remainder %prec FPR          { EApp $1 $2 }
     | TNUM                              { EInt $1 }
     | ID                                { EVar $1 }
     | true                              { EBool True}
@@ -110,11 +111,11 @@ Expr :
     --| ']'                          { ENil }
     --| '[' Expr ']'                 { $2 }
 
---func : func Expr {EApp $1 $2}
+remainder : remainder Expr %prec FPR {EApp $1 $2}
     --|  Expr      {$1}
 
-list : list ']'      { EBin Cons $1 ENil}
-    |list ',' list { EBin Cons $1 $3} 
+list : list ',' list { EBin Cons $1 $3} 
+    |  list ']'      { EBin Cons $1 ENil}
 ids : ID                            {[$1]}
     | ID ids                        { $1:$2 }
 
