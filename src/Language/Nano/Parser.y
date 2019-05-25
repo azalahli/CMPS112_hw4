@@ -75,6 +75,8 @@ import Control.Exception
 %left '+' '-'
 %left '*'
 %left FPR
+%left FSTL
+%right TESTR
 
 %%
 Top  : ID '=' Expr                 { $3 }
@@ -95,8 +97,11 @@ Expr :
     | '\\'ID '->'  Expr                 { ELam $2 $4}
     | let ID '=' Expr in Expr           { ELet $2 $4 $6 }
     | let ID ids '=' Expr in Expr       { ELet $2 (mkLam $3 $5) $7 }
-    | Expr Expr %prec FPR               { EApp $1 $2 }
-    | Expr remainder %prec FPR          { EApp $1 $2 }
+    --| Expr Expr %prec FPR               { EApp $1 $2 }
+    --| Expr remainder %prec FPR          { EApp $1 $2 }
+    | fbody               {$1}
+    --| remainder Expr %prec FPR          { EApp $1 $2}
+    --| Expr Expr %prec FPR               { EApp $1 $2 }
     | TNUM                              { EInt $1 }
     | ID                                { EVar $1 }
     | true                              { EBool True}
@@ -111,8 +116,12 @@ Expr :
     --| ']'                          { ENil }
     --| '[' Expr ']'                 { $2 }
 
-remainder : remainder Expr %prec FPR {EApp $1 $2}
-    --|  Expr      {$1}
+--remainder : 
+--        Expr                            {$1}
+--      | remainder Expr %prec FPR        {EApp $1 $2}
+      
+fbody: Expr Expr {EApp $1 $2}
+| fbody Expr %prec FPR {EApp $2 $1}
 
 list : list ',' list { EBin Cons $1 $3} 
     |  list ']'      { EBin Cons $1 ENil}
