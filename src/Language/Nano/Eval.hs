@@ -190,13 +190,14 @@ eval ev (ELam x y) = VClos ev x y
 eval ev (EApp f a) = case(eval ev f) of 
     (VPrim p) -> p (eval bev a)
     (VClos q1 q2 q3) -> eval bev b
+    _ -> throw (Error "type error EApp")
     where
         (VClos cev c b) = eval ev f
         arg = eval ev a
         bev = (c,arg):cev
 
 
-eval _ _ = throw (Error "type error")
+eval _ _ = throw (Error "type error eval")
 --eval ev (EBin Minus w e)= (eval ev w) (eval ev e)
 --eval ev (EBin Mul w e)= (eval ev w) (eval ev e)
 --------------------------------------------------------------------------------
@@ -208,6 +209,7 @@ evalOp Mul (VInt x) (VInt y) = VInt(x*y)
 
 evalOp Eq (VInt x) (VInt y) = VBool(x == y)
 evalOp Eq (VBool x) (VBool y) = VBool(x == y)
+evalOp Eq (VPair x y) VNil = VBool(x == VNil)
 
 evalOp Ne (VInt x) (VInt y) = VBool(x /= y)
 evalOp Ne (VBool x) (VBool y) = VBool(x /= y)
@@ -217,7 +219,7 @@ evalOp Le (VInt x) (VInt y) = VBool(x <= y)
 
 evalOp And (VBool x) (VBool y) = VBool(x && y)
 evalOp Or (VBool x) (VBool y) = VBool(x || y)
---{-
+{-
 evalOp Eq (VBool x) (VInt y) = throw (Error "type error")
 evalOp Eq (VInt y) (VBool x) = throw (Error "type error")
 
@@ -236,11 +238,11 @@ evalOp And (VInt x) (VBool y) = throw (Error "type error")
 evalOp Or (VInt x) (VInt y) = throw (Error "type error")
 evalOp Or (VBool x) (VInt y) = throw (Error "type error")
 evalOp Or (VInt x) (VBool y) = throw (Error "type error")
-
+--}
 evalOp Cons x y = VPair x y
 -- i don't know why this did not work earlier
-evalOp _ _ _ = throw (Error "type error")
---}
+evalOp _ _ _ = throw (Error "type error evalOp")
+
 --------------------------------------------------------------------------------
 -- | `lookupId x env` returns the most recent
 --   binding for the variable `x` (i.e. the first
@@ -270,8 +272,8 @@ prelude :: Env
 prelude =
   [ -- HINT: you may extend this "built-in" environment
     -- with some "operators" that you find useful...
-    ("head", VPrim(\(VPair x y) -> x))
-    --("tail",\(VPair x y) -> y)
+    ("head", VPrim(\(VPair x y) -> x)),
+    ("tail", VPrim(\(VPair x y) -> y) )
   ]
 
 env0 :: Env

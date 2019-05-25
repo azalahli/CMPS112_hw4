@@ -67,14 +67,31 @@ import Control.Exception
 Top  : ID '=' Expr                 { $3 }
      | Expr                        { $1 }
 
-Expr : TNUM                        { EInt $1 }
-    | ID                           { EVar $1 }
+Expr1 : Expr1 '||' Expr2           { EBin Or $1 $3} 
+    --TNUM                        { EInt $1 }
+    --| ID                           { EVar $1 }
     | true                         { EBool True}
     | false                        { EBool False}
     | let ID '=' Expr in Expr      { ELet $2 $4 $6 }
     --| let ID ID '=' Expr in Expr { ELet (mkLam $2 $3) $5 $7 }
     | if Expr then Expr else Expr  { EIf $2 $4 $6 }
     | '\\'ID '->'  Expr            { ELam $2 $4}
+    |Expr2
+Expr2 : Expr2 '&&' Expr3           { EBin And $1 $3 }
+    |   Expr3
+Expr3 : Expr3 '=='  Expr4          { EBin Eq $1 $3 }
+    |   Expr3 '/='  Expr4          { EBin Ne $1 $3 }
+    |   Expr3 '<'   Expr4          { EBin Lt $1 $3 }
+    |   Expr3 '<='  Expr4          { EBin Le $1 $3 }
+    |   Expr4
+Expr4 : Expr4 '+'   Expr5          { EBin Plus $1 $3 }
+    |   Expr4 '-'   Expr5          { EBin Minus $1 $3 }
+    |   Expr5
+Expr5 : Expr5 '*' Expr6            { EBin Mul $1 $3}
+Expr6 : TNUM
+    | ID                           { EVar $1 }
+    | '\\'ID '->'  Expr            { ELam $2 $4}
+    | '(' Expr ')'
 
 {
 mkLam :: [Id] -> Expr -> Expr
