@@ -34,7 +34,34 @@ tokens :-
   \)                            { \p _ -> RPAREN p }
   \:                            { \p _ -> COLON  p }
   \,                            { \p _ -> COMMA  p }
+  "True"                        { \p _ -> TRUE   p }
+  "False"                       { \p _ -> FALSE  p }
 
+
+  "let"                         { \p s -> LET    p }
+  "="                           { \p s -> EQB    p }
+  "in"                          { \p s -> IN    p }
+  "\"                           { \p s -> LAM    p }
+  "->"                          { \p s -> ARROW    p }
+  "if"                          { \p s -> IF    p }
+  "then"                        { \p s -> THEN    p }
+  "else"                        { \p s -> ELSE    p }
+
+  "+"                           { \p s -> PLUS    p }
+  "-"                           { \p s -> MINUS    p }
+  "*"                           { \p s -> MUL    p }
+  "<"                           { \p s -> LESS    p }
+  "<="                          { \p s -> LEQ    p }
+  "=="                          { \p s -> EQL    p }
+  "/="                          { \p s -> NEQ    p }
+  "&&"                          { \p s -> AND    p }
+  "||"                          { \p s -> OR    p }
+  
+  "("                           { \p s -> LPAREN    p }
+  ")"                           { \p s -> RPAREN    p }
+
+  $alpha [$alpha $digit]*       { \p s -> ID     p s }
+  $digit+                       { \p s -> NUM    p (read s) }
   -- DO NOT CHANGE ANYTHING AFTER THIS LINE ------------------------------------
   ------------------------------------------------------------------------------
 {

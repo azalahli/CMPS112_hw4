@@ -168,6 +168,7 @@ exitError (Error msg) = return (VErr msg)
 eval :: Env -> Expr -> Value
 --------------------------------------------------------------------------------
 --eval ev (Value q) = q
+eval ev ENil = VNil
 eval ev (EInt q) = value q
 eval ev (EVar q) = lookupId q ev
 eval ev (EBin q w e)= evalOp q (eval ev w) (eval ev e)
@@ -186,7 +187,9 @@ eval ev (ELet x e1 e2) = eval env' e2
 --        v = eval ev e1
 --        env1 = (x,v):ev
 eval ev (ELam x y) = VClos ev x y
-eval ev (EApp f a) = eval bev b
+eval ev (EApp f a) = case(eval ev f) of 
+    (VPrim p) -> p (eval bev a)
+    (VClos q1 q2 q3) -> eval bev b
     where
         (VClos cev c b) = eval ev f
         arg = eval ev a
@@ -233,6 +236,8 @@ evalOp And (VInt x) (VBool y) = throw (Error "type error")
 evalOp Or (VInt x) (VInt y) = throw (Error "type error")
 evalOp Or (VBool x) (VInt y) = throw (Error "type error")
 evalOp Or (VInt x) (VBool y) = throw (Error "type error")
+
+evalOp Cons x y = VPair x y
 -- i don't know why this did not work earlier
 evalOp _ _ _ = throw (Error "type error")
 --}
@@ -265,6 +270,8 @@ prelude :: Env
 prelude =
   [ -- HINT: you may extend this "built-in" environment
     -- with some "operators" that you find useful...
+    ("head", VPrim(\(VPair x y) -> x))
+    --("tail",\(VPair x y) -> y)
   ]
 
 env0 :: Env
