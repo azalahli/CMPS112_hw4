@@ -212,6 +212,7 @@ evalOp Eq (VBool x) (VBool y) = VBool(x == y)
 evalOp Eq VNil VNil = VBool(True)
 evalOp Eq (VPair x y) (VPair x1 y1) = VBool((x == x1) && (y == y1))
 evalOp Eq (VPair x y) VNil = VBool(y == VNil)
+evalOp Eq VNil (VPair x y) = VBool(y == VNil)
 
 evalOp Ne (VInt x) (VInt y) = VBool(x /= y)
 evalOp Ne (VBool x) (VBool y) = VBool(x /= y)

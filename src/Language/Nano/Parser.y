@@ -73,12 +73,13 @@ import Control.Exception
 %right ':'
 %left '+' '-'
 %left '*'
+%left FUNCTION
 %%
 Top  : ID '=' Expr                 { $3 }
      | Expr                        { $1 }
 
 Expr : let ID '=' Expr in Expr      { ELet $2 $4 $6 }
-    --| let ID Expr '=' Expr in Expr { ELet $3 $6 $8 }
+    --| let ID ids '=' Expr in Expr { ELet $2 $5 $7 }
     | if Expr then Expr else Expr  { EIf $2 $4 $6 }
     | Expr '||' Expr               { EBin Or $1 $3}
     | Expr '&&' Expr               { EBin And $1 $3}
@@ -97,11 +98,16 @@ Expr : let ID '=' Expr in Expr      { ELet $2 $4 $6 }
     | false                        { EBool False}
     | Expr Expr                    { EApp $1 $2}
     | '(' Expr ')'                 { $2 }
-    | '[' Expr ',' Expr            { EBin Cons $2 $4}
-    | Expr ']'                     { EBin Cons $1 ENil}
+    --| '[' Expr ']'                 { $2 }
+    --| '[' list                       { $2 }
+    |  Expr ',' Expr               { EBin Cons $1 $3}
+    | ']'                          { ENil }
     | '[' ']'                      { ENil }
-    
-    
+
+--list : list ']'      { EBin Cons $1 ENil}
+    --|list ',' list { EBin Cons $1 $3} 
+--ids : ID                            {$1}
+--    | ID ids                        { $1:$2 }
 
 {
 mkLam :: [Id] -> Expr -> Expr
