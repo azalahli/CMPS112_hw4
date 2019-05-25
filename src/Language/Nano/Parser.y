@@ -70,44 +70,53 @@ import Control.Exception
 %left '||'
 %left '&&'
 %left '==' '/=' '<' '<='
-%right ':'
+%right ':' ','
+%right ']'
 %left '+' '-'
 %left '*'
-%left FUNCTION
+%left FPR
+
 %%
 Top  : ID '=' Expr                 { $3 }
      | Expr                        { $1 }
 
-Expr : let ID '=' Expr in Expr      { ELet $2 $4 $6 }
-    --| let ID ids '=' Expr in Expr { ELet $2 $5 $7 }
-    | if Expr then Expr else Expr  { EIf $2 $4 $6 }
-    | Expr '||' Expr               { EBin Or $1 $3}
-    | Expr '&&' Expr               { EBin And $1 $3}
-    | Expr '<=' Expr               { EBin Le $1 $3}
-    | Expr '<' Expr                { EBin Lt $1 $3}
-    | Expr '/=' Expr               { EBin Ne $1 $3}
-    | Expr '==' Expr               { EBin Eq $1 $3}
-    | Expr ':' Expr                { EBin Cons $1 $3}
-    | Expr '-' Expr                { EBin Minus $1 $3}
-    | Expr '+' Expr                { EBin Plus $1 $3}
-    | Expr '*' Expr                { EBin Mul $1 $3}
-    | '\\'ID '->'  Expr            { ELam $2 $4}
-    | TNUM                         { EInt $1 }
-    | ID                           { EVar $1 }
-    | true                         { EBool True}
-    | false                        { EBool False}
-    | Expr Expr                    { EApp $1 $2}
-    | '(' Expr ')'                 { $2 }
-    --| '[' Expr ']'                 { $2 }
-    --| '[' list                       { $2 }
-    |  Expr ',' Expr               { EBin Cons $1 $3}
-    | ']'                          { ENil }
-    | '[' ']'                      { ENil }
+Expr : 
+      if Expr then Expr else Expr       { EIf $2 $4 $6 }
+    | Expr '||' Expr                    { EBin Or $1 $3}
+    | Expr '&&' Expr                    { EBin And $1 $3}
+    | Expr '<=' Expr                    { EBin Le $1 $3}
+    | Expr '<' Expr                     { EBin Lt $1 $3}
+    | Expr '/=' Expr                    { EBin Ne $1 $3}
+    | Expr '==' Expr                    { EBin Eq $1 $3}
+    | Expr ':' Expr                     { EBin Cons $1 $3}
+    | Expr '-' Expr                     { EBin Minus $1 $3}
+    | Expr '+' Expr                     { EBin Plus $1 $3}
+    | Expr '*' Expr                     { EBin Mul $1 $3}
+    | '\\'ID '->'  Expr                 { ELam $2 $4}
+    | let ID '=' Expr in Expr           { ELet $2 $4 $6 }
+    | let ID ids '=' Expr in Expr       { ELet $2 (mkLam $3 $5) $7 }
+    | Expr Expr %prec FPR               { EApp $1 $2 }
+    | TNUM                              { EInt $1 }
+    | ID                                { EVar $1 }
+    | true                              { EBool True}
+    | false                             { EBool False}
+    | '(' Expr ')'                      { $2 }
+    | '[' list                          { $2 }
+    | '[' ']'                           { ENil }
 
---list : list ']'      { EBin Cons $1 ENil}
-    --|list ',' list { EBin Cons $1 $3} 
---ids : ID                            {$1}
---    | ID ids                        { $1:$2 }
+
+    --| Expr Expr %prec FPR          { EApp $1 $2}
+    --|  Expr ',' Expr               { EBin Cons $1 $3}
+    --| ']'                          { ENil }
+    --| '[' Expr ']'                 { $2 }
+
+--func : func Expr {EApp $1 $2}
+    --|  Expr      {$1}
+
+list : list ']'      { EBin Cons $1 ENil}
+    |list ',' list { EBin Cons $1 $3} 
+ids : ID                            {[$1]}
+    | ID ids                        { $1:$2 }
 
 {
 mkLam :: [Id] -> Expr -> Expr
