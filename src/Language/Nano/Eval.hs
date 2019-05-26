@@ -169,6 +169,7 @@ eval :: Env -> Expr -> Value
 --------------------------------------------------------------------------------
 --eval ev (Value q) = q
 eval ev ENil = VNil
+eval ev (EBool x) = VBool x
 eval ev (EInt q) = value q
 eval ev (EVar q) = lookupId q ev
 eval ev (EBin q w e)= evalOp q (eval ev w) (eval ev e)
@@ -197,7 +198,7 @@ eval ev (EApp f a) = case(eval ev f) of
         bev = (c,arg):cev
 
 
-eval _ _ = throw (Error "type error eval")
+eval er1 er2 = throw (Error ("type error eval: " ++ {-envString er1 ++-} exprString er2) )
 --eval ev (EBin Minus w e)= (eval ev w) (eval ev e)
 --eval ev (EBin Mul w e)= (eval ev w) (eval ev e)
 --------------------------------------------------------------------------------
