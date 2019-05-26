@@ -100,19 +100,22 @@ Expr :
     | let ID '=' Expr in Expr           { ELet $2 $4 $6 }
     | let ID ids '=' Expr in Expr       { ELet $2 (mkLam $3 $5) $7 }
 
-    | func Expr %prec APP               { EApp $1 $2 }
+    --| func Expr %prec APP               { EApp $1 $2 }
+    | Expr body                         { EApp $1 $2 }
     | Expr Expr %prec APP               { EApp $1 $2}
+
     | TNUM                              { EInt $1 }
     | ID                                { EVar $1 }
     | true                              { EBool True}
     | false                             { EBool False}
     | '(' Expr ')'                      { $2 }
-    | '[' lst ']'                           { $2 }
-    --| Expr ']' %prec LOWL              { EBin Cons $1 ENil}
+    | '[' lst ']'                       { $2 }
     | '[' ']'                           { ENil }
 
 func: func Expr {EApp $1 $2}
-| Expr Expr {EApp $1 $2}
+--| Expr {$1}
+
+body: Expr body {EApp $1 $2}
 
 lst: Expr ',' lst    { EBin Cons $1 $3}
     | Expr            {EBin Cons $1 ENil}
@@ -126,6 +129,7 @@ lst: Expr ',' lst    { EBin Cons $1 $3}
     --| fbody                             {$1}
     --| remainder Expr %prec FPR          { EApp $1 $2}
     --| Expr Expr %prec FPR               { EApp $1 $2 }
+    --| Expr ']' %prec LOWL              { EBin Cons $1 ENil}
 --remainder : 
 --        Expr                            {$1}
 --      | remainder Expr %prec FPR        {EApp $1 $2}
